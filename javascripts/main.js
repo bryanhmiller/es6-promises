@@ -3,6 +3,29 @@
 // ES6-ify it all!
 
 $(document).ready(function(){
+	var outputContainer = $("#output");
+
+	var writeToDOM = function (humanArray) {
+	  var domString = ""
+	  for (var i = 0; i < humanArray.length; i++) {
+	    domString += `<div class="human row">`
+	    domString += `<div class="col-sm-4">`
+	    domString += `<img src="${humanArray[i].image}">`
+	    domString += `<p>${humanArray[i].name}</p>`
+	    domString += `</div>`
+	    domString += `<div class="col-sm-8 overflow-row">`
+	    for (var j = 0; j < humanArray[i].matches.length; j++){
+	      domString += `<div class="animal">`
+	      domString += `<img src="${humanArray[i].matches[j].image}">`
+	      domString += `<p>${humanArray[i].matches[j].name}</p>`
+	      domString += `<p>${humanArray[i].matches[j].description}</p>`
+	      domString += `</div>`
+	    }
+	    domString += `</div>`
+	    domString += `</div>`
+	  }
+	  outputContainer.append(domString)
+	}
 
 	var loadHumans = function() {
 		return new Promise(function(resolve, reject) {
@@ -66,6 +89,16 @@ $(document).ready(function(){
 		return isMatch;
 	};
 
+	var checkForKidFriendly = function(human, pet) {
+		var hasKids = human["has-kids"];
+		var isKidFriendly = pet["kid-friendly"];
+		var isMatched = true;
+		if (hasKids && !isKidFriendly) {
+			isMatched = false;
+		}
+		return isMatched;
+	};
+
 	loadHumans().then(function(humans){
 		// myHumans.push(humans)
 		humans.forEach(function(human){
@@ -81,13 +114,19 @@ $(document).ready(function(){
 			});
 			for (var i = 0; i < myHumans.length; i++) {
 				for (var j = 0; j < myAnimals.length; j++) {
-					if (checkForTypeMatch(myHumans[i], myAnimals[j])){
+					if (checkForTypeMatch(myHumans[i], myAnimals[j]) && checkForKidFriendly(myHumans[i], myAnimals[j])){
 						myHumans[i].matches.push(myAnimals[j]);
 					}
 				}
 			}
-			console.log(myHumans);
+			writeToDOM(myHumans);
+		})
+		.catch(function(errors){
+			console.log(errors);
 		});
+	})
+	.catch(function(humanError){
+		console.log(humanError);
 	});
 
 
